@@ -1,0 +1,33 @@
+{
+    "sensors": [
+        {
+            "name": "$$SENN[0]$$",
+            "short_name": "$$SENS[0]$$",
+            "operation_state": "$$SENO[0]$$",
+            "description": "$$SEND[0]$$",
+            "type": "$$SENT[0]$$",
+            "value": "$$SENV[0]$$"
+        }, {
+            "name": "$$SENN[1]$$",
+            "short_name": "$$SENS[1]$$",
+            "operation_state": "$$SENO[1]$$",
+            "description": "$$SEND[1]$$",
+            "type": "$$SENT[1]$$",
+            "value": "$$SENV[1]$$"
+        }, {
+            "name": "$$SENN[2]$$",
+            "short_name": "$$SENS[2]$$",
+            "operation_state": "$$SENO[2]$$",
+            "description": "$$SEND[2]$$",
+            "type": "$$SENT[2]$$",
+            "value": "$$SENV[2]$$"
+        }, {
+            "name": "$$SENN[3]$$",
+            "short_name": "$$SENS[3]$$",
+            "operation_state": "$$SENO[3]$$",
+            "description": "$$SEND[3]$$",
+            "type": "$$SENT[3]$$",
+            "value": "$$SENV[3]$$"
+        }
+    ]
+}

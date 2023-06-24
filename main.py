@@ -1,6 +1,9 @@
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import argparse
+import json
+import re
+import requests
 
 
 def main():
@@ -31,6 +34,25 @@ def main():
                             username=args.username, password=args.password, auth_basic=args.basic_auth)
 
     write_api = client.write_api(write_options=SYNCHRONOUS)
+
+    response = requests.get(args.profilux_url)
+    response_json = json.loads(response.text)
+
+    # Write all sensor values to InfluxDB
+    for sensor in response_json['sensors']:
+        value = sensor['value'].strip()  # Remove leading and trailing whitespace
+        if all(c == '-' for c in value):
+            # Skip sensors with all dashes
+            continue
+
+        # Split value into number and unit
+        split = re.split('([0-9.]+)', value)
+        value, unit = float(split[1].strip()), split[2].strip()
+        name = sensor['name'].strip()
+
+        # Write sensor value to InfluxDB
+        point = Point(args.measurement).tag('name', name).tag('unit', unit).field('value', value)
+        write_api.write(bucket=args.bucket, record=point)
 
 
 if __name__ == '__main__':

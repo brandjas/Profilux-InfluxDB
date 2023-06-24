@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 import requests
+import time
 
 
 def main():
@@ -23,6 +24,9 @@ def main():
 
     parser.add_argument('--basic-auth', action='store_true', help='Use basic authentication instead of token')
 
+    parser.add_argument('--interval', type=int, default=0,
+                        help='Interval in seconds to query Profilux and write to InfluxDB (0 to run only once)')
+
     args = parser.parse_args()
 
     # Check if we have either only a token or only a username/password
@@ -35,24 +39,30 @@ def main():
 
     write_api = client.write_api(write_options=SYNCHRONOUS)
 
-    response = requests.get(args.profilux_url)
-    response_json = json.loads(response.text)
+    while True:
+        response = requests.get(args.profilux_url)
+        response_json = json.loads(response.text)
 
-    # Write all sensor values to InfluxDB
-    for sensor in response_json['sensors']:
-        value = sensor['value'].strip()  # Remove leading and trailing whitespace
-        if all(c == '-' for c in value):
-            # Skip sensors with all dashes
-            continue
+        # Write all sensor values to InfluxDB
+        for sensor in response_json['sensors']:
+            value = sensor['value'].strip()  # Remove leading and trailing whitespace
+            if all(c == '-' for c in value):
+                # Skip sensors with all dashes
+                continue
 
-        # Split value into number and unit
-        split = re.split('([0-9.]+)', value)
-        value, unit = float(split[1].strip()), split[2].strip()
-        name = sensor['name'].strip()
+            # Split value into number and unit
+            split = re.split('([0-9.]+)', value)
+            value, unit = float(split[1].strip()), split[2].strip()
+            name = sensor['name'].strip()
 
-        # Write sensor value to InfluxDB
-        point = Point(args.measurement).tag('name', name).tag('unit', unit).field('value', value)
-        write_api.write(bucket=args.bucket, record=point)
+            # Write sensor value to InfluxDB
+            point = Point(args.measurement).tag('name', name).tag('unit', unit).field('value', value)
+            write_api.write(bucket=args.bucket, record=point)
+
+        if args.interval == 0:
+            break
+
+        time.sleep(args.interval)
 
 
 if __name__ == '__main__':

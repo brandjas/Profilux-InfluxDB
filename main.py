@@ -13,10 +13,12 @@ def main():
     parser.add_argument('--measurement', type=str, default='profilux', help='InfluxDB measurement name')
 
     parser.add_argument('--token', type=str, help='InfluxDB token')
-    parser.add_argument('--org', type=str, help='InfluxDB organization')
+    parser.add_argument('--org', type=str, default='profilux', help='InfluxDB organization')
 
     parser.add_argument('--username', type=str, help='InfluxDB username')
     parser.add_argument('--password', type=str, help='InfluxDB password')
+
+    parser.add_argument('--basic-auth', action='store_true', help='Use basic authentication instead of token')
 
     args = parser.parse_args()
 
@@ -26,7 +28,7 @@ def main():
         parser.error('You must provide either a token or a username/password combination')
 
     client = InfluxDBClient(url=args.influxdb_url, token=args.token, org=args.org,
-                            username=args.username, password=args.password)
+                            username=args.username, password=args.password, auth_basic=args.basic_auth)
 
     write_api = client.write_api(write_options=SYNCHRONOUS)
 
